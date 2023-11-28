@@ -1,4 +1,4 @@
-// main.go
+// Package main cmd/user-api/main.go
 package main
 
 import (
@@ -8,13 +8,31 @@ import (
 	"log"
 	"net/http"
 	"os"
+
 	"workspace/internal/app/handler"
 	"workspace/internal/app/repository"
 	"workspace/internal/app/service"
+	_ "workspace/pkg/api/middleware"
 	"workspace/pkg/api/router"
-	"workspace/pkg/database"
+	db "workspace/pkg/database"
+
+	_ "workspace/docs" // Import the generated Swagger docs
 )
 
+// @title Go User API
+// @version 1.0
+// @description This is a sample go user api server.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name Md Hafizur Rahman
+// @contact.url <a href="mailto:hafizur.upm@gmail.com">Reach out</a>
+// @contact.email hafizur.upm@gmail.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host
+// @BasePath /
 func main() {
 	// Load environment variables
 	err := godotenv.Load()
@@ -29,8 +47,9 @@ func main() {
 	userRepo := repository.NewUserRepository()
 	userService := service.NewUserService(userRepo)
 
-	// Initialize router and middleware
 	r := mux.NewRouter()
+
+	// Initialize router and middleware
 	//r.Use(middleware.AuthMiddleware)
 
 	// Initialize API handlers

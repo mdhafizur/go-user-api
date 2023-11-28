@@ -1,10 +1,9 @@
-// Package router internal/app/router/router.go
+// Package router pkg/api/router/router.go
 package router
 
 import (
 	"fmt"
 	"net/http"
-	_ "workspace/cmd/user-api/docs" // Import the generated Swagger docs
 	"workspace/internal/app/handler"
 
 	"github.com/gorilla/mux"
@@ -12,40 +11,28 @@ import (
 )
 
 // SetupUserRoutes sets up the user-related routes.
-// @title User API
-// @version 1.0
-// @description This is a sample User API.
-// @host localhost:8080
-// @BasePath /app/v1
 func SetupUserRoutes(r *mux.Router, userHandler *handler.UserHandler) {
+	apiRouter := r.PathPrefix("/api").Subrouter()
+
+	// Hello route without the /api prefix
 	r.HandleFunc("/", helloHandler).Methods("GET").Name("Hello")
-	r.HandleFunc("/users", userHandler.GetUsers).Methods("GET").Name("GetUsers")
-	r.HandleFunc("/users/{uuid}", userHandler.GetUserByID).Methods("GET").Name("GetUserByID")
-	r.HandleFunc("/users", userHandler.CreateUser).Methods("POST").Name("CreateUser")
-	r.HandleFunc("/users/{uuid}", userHandler.UpdateUser).Methods("PUT").Name("UpdateUser")
-	r.HandleFunc("/users/{uuid}", userHandler.DeleteUser).Methods("DELETE").Name("DeleteUser")
+
+	// User-related routes with the /api prefix
+	apiRouter.HandleFunc("/v1/users", userHandler.GetUsers).Methods("GET").Name("GetUsers")
+	apiRouter.HandleFunc("/v1/users/{uuid}", userHandler.GetUserByUUID).Methods("GET").Name("GetUserByID")
+	apiRouter.HandleFunc("/v1/users", userHandler.CreateUser).Methods("POST").Name("CreateUser")
+	apiRouter.HandleFunc("/v1/users/{uuid}", userHandler.UpdateUser).Methods("PUT").Name("UpdateUser")
+	apiRouter.HandleFunc("/v1/users/{uuid}", userHandler.DeleteUser).Methods("DELETE").Name("DeleteUser")
 
 	// Serve Swagger documentation
 	r.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
-		httpSwagger.URL("/swagger/doc.json"),
-	))
-
-	// Serve Swagger UI
-	r.Handle("/swagger", SwaggerUIHandler())
-}
-
-// SwaggerUIHandler returns a handler for serving the Swagger UI.
-// @Summary Swagger UI
-// @Description Swagger UI for API documentation
-// @ID SwaggerUI
-// @Produce html
-// @Router /swagger [get]
-func SwaggerUIHandler() http.Handler {
-	return httpSwagger.Handler(
-		httpSwagger.URL("/swagger/doc.json"),
-	)
+		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), // The URL pointing to API definition
+		httpSwagger.DeepLinking(true),
+		httpSwagger.DocExpansion("none"),
+		httpSwagger.DomID("swagger-ui"),
+	)).Methods(http.MethodGet)
 }
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "hello")
+	fmt.Fprint(w, "API is running!")
 }

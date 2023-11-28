@@ -1,0 +1,192 @@
+basePath: /
+definitions:
+  model.User:
+    properties:
+      email:
+        type: string
+      username:
+        type: string
+      uuid:
+        type: string
+    required:
+    - email
+    - username
+    type: object
+  types.ErrorResponse:
+    properties:
+      error:
+        properties:
+          code:
+            type: integer
+          details:
+            items:
+              $ref: '#/definitions/types.ValidationError'
+            type: array
+          message:
+            type: string
+        type: object
+    type: object
+  types.SuccessResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  types.ValidationError:
+    properties:
+      field:
+        type: string
+      message:
+        type: string
+    type: object
+info:
+  contact:
+    email: hafizur.upm@gmail.com
+    name: Md Hafizur Rahman
+    url: <a href="mailto:hafizur.upm@gmail.com">Reach out</a>
+  description: This is a sample go user api server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Go User API
+  version: "1.0"
+paths:
+  /api/v1/users:
+    get:
+      description: Get a list of users
+      operationId: GetUsers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get a list of users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      operationId: CreateUser
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/types.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Create a new user
+      tags:
+      - users
+  /api/v1/users/{uuid}:
+    delete:
+      description: Delete user by UUID
+      operationId: DeleteUser
+      parameters:
+      - description: User UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Delete user by UUID
+      tags:
+      - users
+    get:
+      description: Get a user by UUID
+      operationId: GetUserByUUID
+      parameters:
+      - description: User UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get user by UUID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update user by UUID
+      operationId: UpdateUser
+      parameters:
+      - description: User UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Updated user object
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Update user by UUID
+      tags:
+      - users
+swagger: "2.0"

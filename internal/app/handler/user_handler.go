@@ -1,15 +1,24 @@
-// Package handler internal/app/handler/user_apphandler.go
+// Package handler internal/app/handler/user_handler.go
+
+// @title User API
+// @version 1.0
+// @description This is the API for managing users.
+// @host localhost:8080
+// @BasePath /api/v1
+// @schemes http
+
 package handler
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"workspace/pkg/handler"
+	apphandler "workspace/pkg/handler"
 
-	"github.com/gorilla/mux"
 	"workspace/internal/app/model"
 	"workspace/internal/app/service"
+
+	"github.com/gorilla/mux"
 )
 
 // UserHandler handles user-related HTTP requests.
@@ -24,12 +33,15 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 	}
 }
 
+// GetUsers
 // @Summary Get a list of users
 // @Description Get a list of users
 // @ID GetUsers
 // @Produce json
-// @Success 200 {object} YourResponseType
-// @Router /users [get]
+// @Success 200 {object} types.SuccessResponse
+// @Failure 400 {object} types.ErrorResponse "Bad Request"
+// @Failure 500 {object} types.ErrorResponse "Internal Server Error"
+// @Router /api/v1/users [get]
 // @Tags users
 func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.userService.GetUsers()
@@ -39,39 +51,44 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	apphandler.RespondWithJSON(w, users, http.StatusOK)
+	apphandler.RespondWithJSON(w, users, http.StatusOK, "Users retrieved successfully.")
 }
 
-// @Summary Get user by ID
-// @Description Get a user by ID
-// @ID get-user
+// GetUserByUUID
+// @Summary Get user by UUID
+// @Description Get a user by UUID
+// @ID GetUserByUUID
 // @Produce json
-// @Param id path int true "User ID"
-// @Success 200 {object} User
-// @Router /users/{id} [get]
+// @Param uuid path string true "User UUID"
+// @Success 200 {object} types.SuccessResponse
+// @Failure 400 {object} types.ErrorResponse "Bad Request"
+// @Failure 500 {object} types.ErrorResponse "Internal Server Error"
+// @Router /api/v1/users/{uuid} [get]
 // @Tags users
-func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) GetUserByUUID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userUUID := vars["uuid"]
 
-	user, err := h.userService.GetUserByID(userUUID)
+	user, err := h.userService.GetUserByUUID(userUUID)
 	if err != nil {
 		log.Printf("Error getting user by UUID %s: %v", userUUID, err)
 		apphandler.RespondWithError(w, "User not found", http.StatusNotFound)
 		return
 	}
 
-	apphandler.RespondWithJSON(w, user, http.StatusOK)
+	apphandler.RespondWithJSON(w, user, http.StatusOK, "User retrieved successfully.")
 }
 
+// CreateUser
 // @Summary Create a new user
 // @Description Create a new user
 // @ID CreateUser
 // @Accept json
 // @Produce json
-// @Param user body model.User true "User object"
-// @Success 201 {object} User
-// @Router /users [post]
+// @Success 201 {object} types.SuccessResponse
+// @Failure 400 {object} types.ErrorResponse "Bad Request"
+// @Failure 500 {object} types.ErrorResponse "Internal Server Error"
+// @Router /api/v1/users [post]
 // @Tags users
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user model.User
@@ -82,25 +99,36 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Validate the user data
+	if validationErrs := user.Validate(); validationErrs != nil {
+		// Handle the validation errors, e.g., return an error response to the user
+		apphandler.RespondWithError(w, "Validation failed", http.StatusBadRequest, validationErrs)
+		return
+	}
+
 	createdUser, err := h.userService.CreateUser(user)
+
 	if err != nil {
 		log.Printf("Error creating user: %v", err)
 		apphandler.RespondWithError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	apphandler.RespondWithJSON(w, createdUser, http.StatusCreated)
+	apphandler.RespondWithJSON(w, createdUser, http.StatusCreated, "User created successfully.")
 }
 
-// @Summary Update user by ID
-// @Description Update user by ID
+// UpdateUser
+// @Summary Update user by UUID
+// @Description Update user by UUID
 // @ID UpdateUser
 // @Accept json
 // @Produce json
-// @Param id path int true "User ID"
+// @Param uuid path string true "User UUID"
 // @Param user body model.User true "Updated user object"
-// @Success 200 {object} User
-// @Router /users/{id} [put]
+// @Success 200 {object} types.SuccessResponse
+// @Failure 400 {object} types.ErrorResponse "Bad Request"
+// @Failure 500 {object} types.ErrorResponse "Internal Server Error"
+// @Router /api/v1/users/{uuid} [put]
 // @Tags users
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -121,16 +149,19 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	apphandler.RespondWithJSON(w, updatedUser, http.StatusOK)
+	apphandler.RespondWithJSON(w, updatedUser, http.StatusOK, "User updated successfully.")
 }
 
-// @Summary Delete user by ID
-// @Description Delete user by ID
+// DeleteUser this handler handles deletion of a user
+// @Summary Delete user by UUID
+// @Description Delete user by UUID
 // @ID DeleteUser
 // @Produce json
-// @Param id path int true "User ID"
+// @Param uuid path string true "User UUID"
 // @Success 204 "No Content"
-// @Router /users/{id} [delete]
+// @Failure 400 {object} types.ErrorResponse "Bad Request"
+// @Failure 500 {object} types.ErrorResponse "Internal Server Error"
+// @Router /api/v1/users/{uuid} [delete]
 // @Tags users
 func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
