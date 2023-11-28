@@ -47,3 +47,7 @@ To generate swagger doc
 ```bash
 swag init -g cmd/user-api/main.go
 ```
+
+Notes:
+kindly change the DB_URL according to your need
+it's currently set only for docker

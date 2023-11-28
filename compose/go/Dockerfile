@@ -15,7 +15,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go application
-RUN go build -o user-app ./cmd/user-app
+RUN go build -o user-api ./cmd/user-api
 
 # Start a new stage for a smaller image
 FROM alpine:latest
@@ -25,7 +25,7 @@ WORKDIR /app
 
 # Copy the binary from the builder stage to the current stage
 COPY --from=builder /app/user-api .
-COPY --from=builder /app/cmd/user-api/docs ./docs
+COPY --from=builder /app/docs ./docs
 
 # Copy the .env file
 COPY --from=builder /app/.env .
