@@ -2,11 +2,12 @@
 package test
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"workspace/internal/app/model"
 	"workspace/internal/app/repository"
-	"workspace/pkg/database"
+	db "workspace/pkg/database"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUserRepository_GetUserByID(t *testing.T) {
@@ -23,7 +24,7 @@ func TestUserRepository_GetUserByID(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Act
-	retrievedUser, err := userRepo.GetUserByID(insertedUser.UUID)
+	retrievedUser, err := userRepo.GetUserByUUID(insertedUser.UUID)
 
 	// Assert
 	assert.NoError(t, err)

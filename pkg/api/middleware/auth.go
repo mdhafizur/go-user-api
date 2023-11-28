@@ -1,4 +1,4 @@
-// Package middleware internal/app/middleware/auth.go
+// Package middleware pkg/api/middleware/auth.go
 package middleware
 
 import (

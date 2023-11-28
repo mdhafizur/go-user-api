@@ -1,4 +1,4 @@
-// Package repository internal/repository/user_repository.go
+// Package repository internal/app/repository/user_repository.go
 package repository
 
 import (
@@ -23,8 +23,8 @@ func NewUserRepository() *UserRepository {
 	}
 }
 
-// GetUserByID retrieves a user by ID from MongoDB.
-func (r *UserRepository) GetUserByID(userUUID string) (*model.User, error) {
+// GetUserByUUID retrieves a user by uuid from MongoDB.
+func (r *UserRepository) GetUserByUUID(userUUID string) (*model.User, error) {
 	collection := r.db.Collection("users")
 	filter := bson.M{"uuid": userUUID}
 
@@ -58,11 +58,6 @@ func (r *UserRepository) GetUsers() ([]model.User, error) {
 
 // CreateUser creates a new user in the database.
 func (r *UserRepository) CreateUser(user model.User) (*model.User, error) {
-	// Check email uniqueness
-	if err := r.isEmailUnique(user.Email); err != nil {
-		return nil, err
-	}
-
 	// Generate UUID if not provided
 	if user.UUID == "" {
 		user.UUID = uuid.New().String()
@@ -77,28 +72,6 @@ func (r *UserRepository) CreateUser(user model.User) (*model.User, error) {
 
 	return &user, nil
 }
-
-// isEmailUnique checks if the given email is unique in the database.
-func (r *UserRepository) isEmailUnique(email string) error {
-	collection := r.db.Collection("users")
-
-	// Check if a user with the given email already exists
-	filter := bson.M{"email": email}
-	count, err := collection.CountDocuments(context.Background(), filter)
-	if err != nil {
-		return err
-	}
-
-	if count > 0 {
-		// Email is not unique, return an error
-		return ErrEmailNotUnique
-	}
-
-	return nil
-}
-
-// ErrEmailNotUnique is a custom error indicating that the email is not unique.
-var ErrEmailNotUnique = errors.New("email is not unique")
 
 // UpdateUser updates a user in MongoDB.
 func (r *UserRepository) UpdateUser(userUUID string, updatedUser model.User) (*model.User, error) {
@@ -124,6 +97,27 @@ func (r *UserRepository) DeleteUser(userUUID string) error {
 
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// IsEmailUnique checks if the given email is unique in the database.
+func (r *UserRepository) IsEmailUnique(email string) error {
+	var ErrEmailNotUnique = errors.New("email is not unique")
+
+	collection := r.db.Collection("users")
+
+	// Check if a user with the given email already exists
+	filter := bson.M{"email": email}
+	count, err := collection.CountDocuments(context.Background(), filter)
+	if err != nil {
+		return err
+	}
+
+	if count > 0 {
+		// Email is not unique, return an error
+		return ErrEmailNotUnique
 	}
 
 	return nil

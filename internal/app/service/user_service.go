@@ -18,9 +18,9 @@ func NewUserService(userRepository *repository.UserRepository) *UserService {
 	}
 }
 
-// GetUserByID retrieves a user by ID.
-func (s *UserService) GetUserByID(userUUID string) (*model.User, error) {
-	return s.userRepository.GetUserByID(userUUID)
+// GetUserByUUID retrieves a user by uuid.
+func (s *UserService) GetUserByUUID(userUUID string) (*model.User, error) {
+	return s.userRepository.GetUserByUUID(userUUID)
 }
 
 // GetUsers retrieves all users.
@@ -30,6 +30,11 @@ func (s *UserService) GetUsers() ([]model.User, error) {
 
 // CreateUser creates a new user.
 func (s *UserService) CreateUser(user model.User) (*model.User, error) {
+	// Check email uniqueness
+	if err := s.userRepository.IsEmailUnique(user.Email); err != nil {
+		return nil, err
+	}
+
 	return s.userRepository.CreateUser(user)
 }
 

@@ -10,7 +10,7 @@ import (
 	"workspace/internal/app/service"
 )
 
-func TestGetUserByID(t *testing.T) {
+func TestGetUserByUUID(t *testing.T) {
 	// Arrange
 
 	userRepo := repository.NewUserRepository()
@@ -21,7 +21,7 @@ func TestGetUserByID(t *testing.T) {
 	}
 
 	// Act
-	actualUser, err := userService.GetUserByID("1")
+	actualUser, err := userService.GetUserByUUID("1")
 
 	// Assert
 	if err != nil {

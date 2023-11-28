@@ -1,4 +1,4 @@
-// Package db db/db.go
+// Package db pkg/database/db.go
 package db
 
 import (
@@ -29,6 +29,14 @@ func Initialize(dbURL ...string) {
 		}
 	}
 
+	// Get the MongoDB database name from the environment variable
+	mongoDBName := os.Getenv("MONGO_INITDB_DATABASE")
+	// Set a default value if the environment variable is not set
+	if mongoDBName == "" {
+		mongoDBName = "testdb"
+		log.Fatal("MONGO_INITDB_DATABASE environment variable not set")
+	}
+
 	clientOptions := options.Client().ApplyURI(actualDBURL)
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
@@ -43,8 +51,8 @@ func Initialize(dbURL ...string) {
 	fmt.Println("Connected to MongoDB")
 
 	Client = client
-	// Assuming your database name is "testdb"
-	Database = client.Database("testdb")
+
+	Database = client.Database(mongoDBName)
 }
 
 // Disconnect closes the database connection.
