@@ -34,7 +34,7 @@ func Initialize(dbURL ...string) {
 	// Set a default value if the environment variable is not set
 	if mongoDBName == "" {
 		mongoDBName = "testdb"
-		log.Fatal("MONGO_INITDB_DATABASE environment variable not set")
+		log.Printf("MONGO_INITDB_DATABASE environment variable not set")
 	}
 
 	clientOptions := options.Client().ApplyURI(actualDBURL)
